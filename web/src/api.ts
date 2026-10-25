@@ -1,5 +1,11 @@
 import type { CaseDetail, CaseStatus, CaseSummary, InboundMessage, ResolutionCode } from "../../shared/types";
 
+export interface ClockInfo {
+  now: number;
+  aiEnabled: boolean;
+  runtime: "server" | "browser";
+}
+
 export interface CaseList {
   cases: CaseSummary[];
   counts: Record<CaseStatus, number>;
@@ -29,8 +35,13 @@ export interface PodPack {
   tiv: { loadedAt: number | null; atDeliveryMin: number | null; budgetMin: number | null; withinBudget: boolean };
 }
 
+// VITE_BROWSER_API=true (static deploy) runs the API in the browser instead of calling a server.
+const transport: Promise<(path: string, init?: RequestInit) => Promise<Response>> =
+  import.meta.env.VITE_BROWSER_API === "true" ? import("./local").then((m) => m.localFetch) : Promise.resolve(fetch.bind(window));
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const send = await transport;
+  const res = await send(`/api${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
@@ -42,7 +53,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 const post = <T,>(path: string, body?: unknown) => request<T>(path, { method: "POST", body: JSON.stringify(body ?? {}) });
 
 export const api = {
-  clock: () => request<{ now: number; aiEnabled: boolean }>("/clock"),
+  clock: () => request<ClockInfo>("/clock"),
   advance: (minutes: number) => post<{ now: number }>("/clock/advance", { minutes }),
   reset: () => post<{ now: number }>("/clock/reset"),
   cases: (f: Filters) => {

@@ -9,6 +9,7 @@
     "dev:server": "tsx watch server/index.ts",
     "dev:web": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:static": "tsc --noEmit && VITE_BROWSER_API=true vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

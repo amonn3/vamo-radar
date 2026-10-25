@@ -1,8 +1,9 @@
 import type { CaseStatus } from "../../../shared/types";
+import type { ClockInfo } from "../api";
 import { clock as fmtClock } from "../format";
 
 interface Props {
-  clock: { now: number; aiEnabled: boolean } | null;
+  clock: ClockInfo | null;
   busy: boolean;
   counts?: Record<CaseStatus, number>;
   critical: number;
@@ -31,7 +32,11 @@ export function DevBar({ clock, busy, counts, critical, onAdvance, onMessage, on
         <span className="sim-clock" title="Simulated clock, Eastern Time">
           <span className="muted">SIM</span> {clock ? fmtClock(clock.now) : "--:--"} <span className="muted">ET</span>
         </span>
-        <span className={`engine ${clock?.aiEnabled ? "ai" : "rules"}`} title={clock?.aiEnabled ? "Triage uses the LLM, with rules fallback" : "No ANTHROPIC_API_KEY: triage uses deterministic rules"}>
+        <span className={`engine ${clock?.aiEnabled ? "ai" : "rules"}`} title={
+            clock?.aiEnabled ? "Triage uses the LLM, with rules fallback"
+            : clock?.runtime === "browser" ? "Demo running in your browser: triage uses deterministic rules (LLM runs server-side only)"
+            : "No ANTHROPIC_API_KEY: triage uses deterministic rules"
+          }>
           {clock?.aiEnabled ? "AI triage" : "Rules triage"}
         </span>
         <button onClick={onAdvance} disabled={busy} title="Shortcut: t">Advance 30 min</button>

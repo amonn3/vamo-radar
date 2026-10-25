@@ -22,6 +22,8 @@ No API key is needed. Triage falls back to a deterministic rules engine.
 
 `npm run build && npm start` serves the built app and API from a single process on `PORT`.
 
+**Static deploy (Vercel).** `npm run build:static` builds a version where the same Hono API runs *inside the browser* against a local store (`web/src/local.ts`). Every visitor gets their own stable simulation, which serverless functions with in-memory state could not guarantee. The LLM key stays server-side, so the deployed demo uses rules triage. `vercel.json` is already configured.
+
 ### Demo script (about 3 minutes)
 
 1. **On load**, the 8 planted cases are ranked. The quiet driver with chilled cargo (R-2103) is first. The ambient "where's my order?" (R-2108) is last, so the queue really prioritizes.
@@ -38,7 +40,7 @@ Keyboard: `↑/↓` or `j/k` move through the queue, `c` claims, `a` approves th
 
 ```
 shared/   types, TIV engine, detection rules, priority score (pure functions, unit tested)
-server/   Hono API, in-memory store + simulated clock, seed, triage (LLM + rules)
+server/   Hono API (runtime-agnostic app.ts), in-memory store + simulated clock, seed, triage (rules) and llm.ts
 web/      React + Vite, plain CSS, polling every 3 s
 ```
 

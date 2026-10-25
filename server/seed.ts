@@ -77,7 +77,10 @@ const RECIPIENTS = [
   "Rodrigo Lima", "Jasmine Patel", "Francisco Ruiz", "Megan O'Connor", "Ricardo Salinas",
 ];
 
-export function buildSeed(nowIso: string = process.env.SEED_NOW || DEFAULT_SEED_NOW): SeedData {
+// `process` does not exist when the store runs in the browser (static deploy).
+const envSeedNow = typeof process !== "undefined" ? process.env.SEED_NOW : undefined;
+
+export function buildSeed(nowIso: string = envSeedNow || DEFAULT_SEED_NOW): SeedData {
   const now = Date.parse(nowIso);
   if (Number.isNaN(now)) throw new Error(`Invalid SEED_NOW: ${nowIso}`);
   const rand = mulberry32(42);

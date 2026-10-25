@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CaseDetail } from "../../shared/types";
-import { api, type CaseList, type Filters } from "./api";
+import { api, type CaseList, type ClockInfo, type Filters } from "./api";
 import { CaseView } from "./components/CaseView";
 import { DevBar } from "./components/DevBar";
 import { HandoffModal, PodModal } from "./components/Modals";
@@ -10,7 +10,7 @@ import { SidePanel } from "./components/SidePanel";
 const POLL_MS = 3000;
 
 export function App() {
-  const [clock, setClock] = useState<{ now: number; aiEnabled: boolean } | null>(null);
+  const [clock, setClock] = useState<ClockInfo | null>(null);
   const [filters, setFilters] = useState<Filters>({ status: "active", cargo: "", type: "", q: "" });
   const [list, setList] = useState<CaseList | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);

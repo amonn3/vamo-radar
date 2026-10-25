@@ -8,7 +8,7 @@ import type {
 } from "../shared/types";
 import { buildSeed, type SeedData } from "./seed";
 import { CATEGORY_LABEL } from "../shared/labels";
-import { CATEGORY_URGENCY, triage, triageByRules, type TriageContext } from "./triage";
+import { CATEGORY_URGENCY, triageByRules, triageWithRules, type TriageContext, type TriageFn } from "./triage";
 
 export const OPERATOR = "You";
 
@@ -83,7 +83,10 @@ export class Store {
   private msgSeq = 0;
   private scriptIdx = 0;
 
-  constructor(private readonly seedFactory: () => SeedData = () => buildSeed()) {
+  constructor(
+    private readonly seedFactory: () => SeedData = () => buildSeed(),
+    private readonly triage: TriageFn = triageWithRules,
+  ) {
     this.reset();
   }
 
@@ -476,7 +479,7 @@ export class Store {
       }
     }
 
-    msg.triage = await triage(this.triageContext(msg));
+    msg.triage = await this.triage(this.triageContext(msg));
     if (route) this.addEvent({ routeId: route.id, at: this.now, source: "system", actor: msg.triage.engine === "ai" ? "Radar AI" : "Radar rules", text: `Triaged as ${CATEGORY_LABEL[msg.triage.category]}. Draft reply to ${msg.triage.draft.to} awaiting approval` });
     this.sync();
     return msg;
@@ -489,7 +492,7 @@ export class Store {
 
   async redraft(messageId: string): Promise<InboundMessage> {
     const m = this.message(messageId);
-    m.triage = await triage(this.triageContext(m));
+    m.triage = await this.triage(this.triageContext(m));
     return m;
   }
 
